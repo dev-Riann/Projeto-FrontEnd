@@ -145,14 +145,8 @@
     GithubAuthProvider
   } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-  const firebaseConfig = {
-    apiKey: "CHAVE_REMOVIDA",
-    authDomain: "tasky-39ea6.firebaseapp.com",
-    projectId: "tasky-39ea6",
-    storageBucket: "tasky-39ea6.firebasestorage.app",
-    messagingSenderId: "438206972793",
-    appId: "APP_ID_REMOVIDO"
-  };
+  // IMPORTA AS SUAS CHAVES DO ARQUIVO EXTERNO
+  import { firebaseConfig } from "./firebase-config.js";
   
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
@@ -174,9 +168,9 @@
   // Função utilitária para salvar dados da sessão e redirecionar
   function salvarSessaoERedirecionar(user) {
     const dadosUsuario = {
-      name: user.displayName || user.email.split('@')[0], //se não tiver nome (email/senha) usa o início do e-mail
+      name: user.displayName || user.email.split('@')[0], 
       email: user.email,
-      picture: user.photoURL || 'imagens/porco.jpg' //se não tiver foto, usa sua foto padrão do porco CORINTHIANS
+      picture: user.photoURL || 'imagens/porco.jpg' 
     };
     sessionStorage.setItem('usuario-tasky', JSON.stringify(dadosUsuario));
     window.location.href = 'dashboard.html';
