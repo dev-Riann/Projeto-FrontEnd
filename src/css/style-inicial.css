@@ -45,8 +45,38 @@ header > p {
 }
 
 .modal-content {
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    background: rgba(18, 25, 44, 0.6) !important;
+    -webkit-backdrop-filter: blur(12px); /* Safari iOS/OSX */
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.form-control {
+    background-color: rgba(255, 255, 255, 0.95) !important;
+    border: none;
+    height: 50px;
+    font-weight: 500;
+    color: black !important;
+}
+
+.form-floating > label {
+    color: #6c757d;
+}
+
+/* Remove o fundo azul do autocomplete do Chrome/Edge */
+.form-control:-webkit-autofill,
+.form-control:-webkit-autofill:hover, 
+.form-control:-webkit-autofill:focus {
+    -webkit-text-fill-color: #12192C !important; /* cor do texto */
+    -webkit-box-shadow: 0 0 0px 1000px white inset !important; /* força fundo branco */
+    transition: background-color 5000s ease-in-out 0s; /* hack pra segurar o branco */
+}
+
+/* Pra Firefox */
+.form-control:autofill {
+    background: white !important;
+    color: #12192C !important;
 }
 
 
