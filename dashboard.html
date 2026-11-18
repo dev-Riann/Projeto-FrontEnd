@@ -3,86 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tasky Dashboard</title>
+    <title>Tasky</title>
     <link rel="shortcut icon" href="imagens/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="src/css/style-dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
-<body>
-    <!-- header com menu de usuário -->
+<body class="carregando">
     <header class="dashboard-header">
-    <div class="logo">Tasky</div>
-    
-    <div class="user-menu">
-        <img id="user-avatar" src="imagens/porco.jpg" alt="Avatar" class="avatar-btn">
-        <div id="user-dropdown" class="dropdown hidden">
-            <div class="user-info">
-                <img id="dropdown-avatar" src="imagens/porco.jpg" alt="">
-                <div>
-                    <strong id="user-name">Usuário</strong>
-                    <small id="user-email">usuario@email.com</small>
-                </div>
-            </div> <hr>
-            <button id="logout-btn">
-                <i class="fa-solid fa-right-from-bracket"></i> Sair
-            </button>
+        <div class="logo">Tasky</div>
+        <div class="legenda" aria-label="Legenda de prioridades">
+            <span class="high">Alta</span><span class="medium">Média</span><span class="low">Baixa</span>
         </div>
-    </div>
-</header>
+        <div class="header-right">
+            <span id="save-status" class="save-status" role="status"></span>
+            <div class="user-menu">
+                <img id="user-avatar" src="imagens/porco.jpg" alt="Avatar" class="avatar-btn">
+                <div id="user-dropdown" class="dropdown hidden">
+                    <div class="user-info">
+                        <img id="dropdown-avatar" src="imagens/porco.jpg" alt="">
+                        <div><strong id="user-name">Usuário</strong><small id="user-email"></small></div>
+                    </div>
+                    <hr>
+                    <button id="logout-btn"><i class="fa-solid fa-right-from-bracket"></i> Sair</button>
+                </div>
+            </div>
+        </div>
+    </header>
 
     <main class="dashboard">
-        <!-- coluna 1 - Rosa -->
-        <div class="dashboard-column" data-id="1" style="--column-color: #d573b6;">
+        <div class="dashboard-column" data-id="1" style="--column-color: #b9a8f5;">
             <div class="dashboard-title">
-                <div class="title-left">
-                    <input type="color" class="color-picker" value="#d573b6" title="Mudar cor da coluna">
-                    <h2>A Fazer</h2>
-                </div>
-                <div class="column-actions">
-                    <button class="add-card"><i class="fa-solid fa-plus"></i></button>
-                    <button class="delete-column"><i class="fa-solid fa-trash"></i></button>
-                </div>
+                <div class="title-left"><input type="color" class="color-picker" value="#b9a8f5" title="Mudar cor da coluna"><h2>A Fazer</h2></div>
+                <div class="column-actions"><button class="add-card" title="Novo cartão"><i class="fa-solid fa-plus"></i></button><button class="delete-column" title="Excluir coluna"><i class="fa-solid fa-trash"></i></button></div>
             </div>
             <div class="dashboard-cards"></div>
         </div>
-
-        <!-- coluna 2 > azul -->
-        <div class="dashboard-column" data-id="2" style="--column-color: #58a6ff;">
+        <div class="dashboard-column" data-id="2" style="--column-color: #6cc5c0;">
             <div class="dashboard-title">
-                <div class="title-left">
-                    <input type="color" class="color-picker" value="#58a6ff" title="Mudar cor da coluna">
-                    <h2>Fazendo</h2>
-                </div>
-                <div class="column-actions">
-                    <button class="add-card"><i class="fa-solid fa-plus"></i></button>
-                    <button class="delete-column"><i class="fa-solid fa-trash"></i></button>
-                </div>
+                <div class="title-left"><input type="color" class="color-picker" value="#6cc5c0" title="Mudar cor da coluna"><h2>Fazendo</h2></div>
+                <div class="column-actions"><button class="add-card" title="Novo cartão"><i class="fa-solid fa-plus"></i></button><button class="delete-column" title="Excluir coluna"><i class="fa-solid fa-trash"></i></button></div>
             </div>
             <div class="dashboard-cards"></div>
         </div>
-
-        <!-- coluna 3 > verde -->   
-        <div class="dashboard-column" data-id="3" style="--column-color: #6ed0bc;">
+        <div class="dashboard-column" data-id="3" style="--column-color: #7ccf9b;">
             <div class="dashboard-title">
-                <div class="title-left">
-                    <input type="color" class="color-picker" value="#6ed0bc" title="Mudar cor da coluna">
-                    <h2>Concluído</h2>
-                </div>
-                <div class="column-actions">
-                    <button class="add-card"><i class="fa-solid fa-plus"></i></button>
-                    <button class="delete-column"><i class="fa-solid fa-trash"></i></button>
-                </div>
+                <div class="title-left"><input type="color" class="color-picker" value="#7ccf9b" title="Mudar cor da coluna"><h2>Concluído</h2></div>
+                <div class="column-actions"><button class="add-card" title="Novo cartão"><i class="fa-solid fa-plus"></i></button><button class="delete-column" title="Excluir coluna"><i class="fa-solid fa-trash"></i></button></div>
             </div>
             <div class="dashboard-cards"></div>
         </div>
-
-        <button class="add-column">
-            <i class="fa-solid fa-plus"></i>
-            <span>Adicionar coluna</span>
-        </button>
+        <button class="add-column"><i class="fa-solid fa-plus"></i><span>Adicionar coluna</span></button>
     </main>
 
-    <script src="src/javascript/script.js"></script>
+    <script type="module" src="src/javascript/script.js"></script>
 </body>
 </html>

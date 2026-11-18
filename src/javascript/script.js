@@ -1,24 +1,77 @@
-//CONTROLE DE SESSÃO E LOGIN (SEMPRE NO TOPO)
-const usuarioLogado = JSON.parse(sessionStorage.getItem('usuario-tasky'));
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { firebaseConfig } from "./firebase-config.js";
 
-//se não houver usuário logado no sessionStorage, chuta de volta para a tela de login
-if (!usuarioLogado) {
-    window.location.href = 'inicial.html'; 
-} else {
-    //Altera as imagens do card para usar a foto real do Firebase do usuário logado
-    
-    //Se não tiver foto (cadastro por e-mail), mantém o porquinho padrão
-    const userPhoto = usuarioLogado.picture || 'imagens/porco.jpg';
-    
-    const avatarImg = document.getElementById('user-avatar');
-    const dropImg = document.getElementById('dropdown-avatar');
-    const userName = document.getElementById('user-name');
-    const userEmail = document.getElementById('user-email');
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+let usuarioLogado = null;
+let saveTimer = null;
 
-    if (avatarImg) avatarImg.src = userPhoto;
-    if (dropImg) dropImg.src = userPhoto;
-    if (userName) userName.textContent = usuarioLogado.name;
-    if (userEmail) userEmail.textContent = usuarioLogado.email;
+const esc = (t = '') => String(t).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+// cores neon antigas -> versão suave do novo visual
+const MAPA_CORES = {'#d573b6':'#b9a8f5','#58a6ff':'#6cc5c0','#6ed0bc':'#7ccf9b','#8b5cf6':'#b9a8f5'};
+const PRIO_TEXTO = {high:'Alta prioridade', medium:'Média prioridade', low:'Baixa prioridade'};
+
+function setStatus(texto, tipo = '') {
+    const el = document.getElementById('save-status');
+    if (el) { el.textContent = texto; el.dataset.tipo = tipo; }
+}
+const chaveLocal = () => `tasky-v2-${usuarioLogado.uid}`;
+
+function lerLocal() {
+    try {
+        const novo = JSON.parse(localStorage.getItem(chaveLocal()));
+        if (novo && novo.columns) return novo;
+        // dados antigos (versão da faculdade): não perde nada
+        const antigo = JSON.parse(localStorage.getItem(`dashboard-data-${usuarioLogado.email}`));
+        if (Array.isArray(antigo)) return { t: 0, columns: antigo };
+    } catch (e) { console.warn('Leitura local falhou', e); }
+    return null;
+}
+
+function enviarNuvem(dados) {
+    setDoc(doc(db, 'boards', usuarioLogado.uid), { t: dados.t, payload: JSON.stringify(dados.columns) })
+        .then(() => setStatus('Salvo na nuvem', 'ok'))
+        .catch(e => { console.warn('Nuvem indisponível', e); setStatus('Salvo só neste navegador', 'aviso'); });
+}
+
+function agendarSalvar(columns) {
+    const dados = { t: Date.now(), columns };
+    try { localStorage.setItem(chaveLocal(), JSON.stringify(dados)); } catch (e) {}
+    setStatus('Salvando…');
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => enviarNuvem(dados), 500);
+}
+
+async function iniciar(user) {
+    usuarioLogado = {
+        uid: user.uid,
+        name: user.displayName || user.email.split('@')[0],
+        email: user.email,
+        picture: user.photoURL || 'imagens/porco.jpg'
+    };
+    const set = (id, fn) => { const el = document.getElementById(id); if (el) fn(el); };
+    set('user-avatar', el => el.src = usuarioLogado.picture);
+    set('dropdown-avatar', el => el.src = usuarioLogado.picture);
+    set('user-name', el => el.textContent = usuarioLogado.name);
+    set('user-email', el => el.textContent = usuarioLogado.email);
+
+    const local = lerLocal();
+    let nuvem = null, nuvemOk = true;
+    try {
+        const snap = await getDoc(doc(db, 'boards', user.uid));
+        if (snap.exists()) nuvem = snap.data();
+    } catch (e) { nuvemOk = false; console.warn('Nuvem indisponível', e); }
+
+    let dados = local;
+    if (nuvem && (!local || nuvem.t >= local.t)) dados = { t: nuvem.t, columns: JSON.parse(nuvem.payload) };
+    carregarBoard(dados ? dados.columns : null);
+    document.body.classList.remove('carregando');
+
+    if (nuvemOk && dados && (!nuvem || dados.t > nuvem.t)) enviarNuvem({ t: dados.t || Date.now(), columns: dados.columns });
+    else setStatus(nuvemOk ? 'Salvo na nuvem' : 'Salvo só neste navegador', nuvemOk ? 'ok' : 'aviso');
 }
 
 //FUNÇÕES DE SALVAMENTO E CARREGAMENTO
@@ -45,16 +98,11 @@ function salvarBoard() {
         return { id, cor, titulo, cards };
     });
 
-    const chaveUsuario = `dashboard-data-${usuarioLogado.email}`;
-    localStorage.setItem(chaveUsuario, JSON.stringify(colunas));
+    agendarSalvar(colunas);
 }
 
 //FUNÇÃO: CARREGAR BOARD DO LOCALSTORAGE ESPECÍFICO
-function carregarBoard() {
-    if (!usuarioLogado) return;
-
-    const chaveUsuario = `dashboard-data-${usuarioLogado.email}`;
-    const dadosSalvos = localStorage.getItem(chaveUsuario);
+function carregarBoard(dadosSalvos) {
     const container = document.querySelector('.dashboard');
     if (!container) return;
     
@@ -78,13 +126,14 @@ function carregarBoard() {
     }
     
     //SE HOUVER DADOS SALVOS (Reconstrói o board do zero)
-    const colunas = JSON.parse(dadosSalvos);
+    const colunas = dadosSalvos;
     container.querySelectorAll('.dashboard-column').forEach(c => c.remove());
     
     colunas.forEach(colunaData => {
         const novaColuna = document.createElement('div');
         novaColuna.classList.add('dashboard-column');
         novaColuna.dataset.id = colunaData.id;
+        colunaData.cor = MAPA_CORES[colunaData.cor] || colunaData.cor;
         novaColuna.style.setProperty('--column-color', colunaData.cor);
         
         const fotoUsuario = usuarioLogado.picture || 'imagens/porco.jpg';
@@ -93,7 +142,7 @@ function carregarBoard() {
             <div class="dashboard-title">
                 <div class="title-left">
                     <input type="color" class="color-picker" value="${colunaData.cor}" title="Mudar cor da coluna">
-                    <h2>${colunaData.titulo}</h2>
+                    <h2>${esc(colunaData.titulo)}</h2>
                 </div>
                 <div class="column-actions">
                     <button class="add-card"><i class="fa-solid fa-plus"></i></button>
@@ -120,10 +169,10 @@ function carregarBoard() {
             
             card.innerHTML = `
                 <div class="badge ${cardData.priority}" data-priority="${cardData.priority}">
-                    <span>${cardData.priorityText}</span>
+                    <span>${PRIO_TEXTO[cardData.priority] || esc(cardData.priorityText)}</span>
                     <i class="fa-solid fa-chevron-down"></i>
                 </div>
-                <p class="title-card">${cardData.title}</p>
+                <p class="title-card">${esc(cardData.title)}</p>
                 <div class="card-infos">
                     <div class="user">
                         <img src="${fotoUsuario}" alt="user">
@@ -445,11 +494,13 @@ document.addEventListener('scroll', () => {
 const logoutBtn = document.getElementById('logout-btn');
 if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
-        sessionStorage.removeItem('usuario-tasky');
-        window.location.href = 'inicial.html'; 
+        signOut(auth).finally(() => window.location.href = 'inicial.html');
     });
 }
 
 
-//inicialização da página
-carregarBoard();
+//inicialização: mantém o login (Firebase) e carrega o board
+onAuthStateChanged(auth, user => {
+    if (!user) { window.location.href = 'inicial.html'; return; }
+    iniciar(user);
+});
