@@ -7,6 +7,9 @@
     <link rel="shortcut icon" href="imagens/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="src/css/style-dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#181b24">
+    <link rel="apple-touch-icon" href="imagens/icon-192.png">
 </head>
 <body class="carregando">
     <header class="dashboard-header">
@@ -56,5 +59,10 @@
     </main>
 
     <script type="module" src="src/javascript/script.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+        }
+    </script>
 </body>
 </html>

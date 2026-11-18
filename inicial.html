@@ -7,6 +7,9 @@
     <link rel="shortcut icon" href="imagens/favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="src/css/style-inicial.css">
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="theme-color" content="#181b24">
+    <link rel="apple-touch-icon" href="imagens/icon-192.png">
 </head>
 <body class="geral-inicio">
 
@@ -236,5 +239,10 @@
       .catch(err => alert(err.message));
   });
 </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => navigator.serviceWorker.register('sw.js'));
+        }
+    </script>
 </body>
 </html>
