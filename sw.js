@@ -1,6 +1,6 @@
 // Service worker do Tasky: guarda as telas para abrir rápido e funcionar sem internet.
 // Ao publicar mudanças no site, aumente o número da versão abaixo.
-const VERSAO = 'tasky-v1';
+const VERSAO = 'tasky-v2';
 const ARQUIVOS = [
   './', './inicial.html', './dashboard.html',
   './src/css/style-inicial.css', './src/css/style-dashboard.css',
